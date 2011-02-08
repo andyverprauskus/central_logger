@@ -109,15 +109,22 @@ module CentralLogger
       end
 
       def connect
-        @mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
-                                                    @db_configuration['port'],
-                                                    :auto_reconnect => true).db(@db_configuration['database'])
 
-        if @db_configuration['username'] && @db_configuration['password']
-          # the driver stores credentials in case reconnection is required
-          @authenticated = @mongo_connection.authenticate(@db_configuration['username'],
-                                                          @db_configuration['password'])
-        end
+				if ENV['MONGOHQ_URL']
+					uri = URI.parse(ENV['MONGOHQ_URL'])
+					@mongo_connection ||= Mongo::Connection.new(uri.host, uri.port, :auto_reconnect => true).db(uri.path.gsub(/^\//, ''))
+					@authenticated = @mongo_connection.authenticate(uri.user, uri.password)
+				else
+					@mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
+																											@db_configuration['port'],
+																											:auto_reconnect => true).db(@db_configuration['database'])
+
+					if @db_configuration['username'] && @db_configuration['password']
+						# the driver stores credentials in case reconnection is required
+						@authenticated = @mongo_connection.authenticate(@db_configuration['username'],
+																														@db_configuration['password'])
+					end
+				end
       end
 
       def create_collection

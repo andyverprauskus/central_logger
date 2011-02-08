@@ -21,7 +21,7 @@ Log to a central MongoDB from Rails apps.
        require 'central_logger'
        CentralLogger::Initializer.initialize_deprecated_logger(config)
 
-1. Add mongo settings to database.yml for each environment in which you want to use the Central Logger. The central logger will also
+1. EITHER, Add mongo settings to database.yml for each environment in which you want to use the Central Logger. The central logger will also
    look for a separate central_logger.yml or mongoid.yml (if you are using mongoid) before looking in database.yml.
    In the central_logger.yml and mongoid.yml case, the settings should be defined without the 'mongo' subkey.
 
@@ -46,6 +46,17 @@ Log to a central MongoDB from Rails apps.
           host: localhost
           port: 27017
           replica_set: true
+
+ * OR, for Heroku users, CentralLogger also checks for the MONGOHQ_URL string in your environment.  Should the
+   variable be set, CentralLogger will use that instead your database configuration.  This
+   allows CentralLogger to work with Heroku out of the box.  Related docs on this:
+
+      <a href="http://addons.heroku.com/mongohq">http://addons.heroku.com/mongohq</a><br />
+      <a href="http://doejo.com/blog/rails-mongodb-logging-on-heroku-with-mongohq">http://doejo.com/blog/rails-mongodb-logging-on-heroku-with-mongohq</a>
+
+
+* * *
+
 
   With that in place, a new MongoDB document (record) will be created for each request and,
   by default will record the following information: Runtime, IP Address, Request Time, Controller,
