@@ -109,10 +109,11 @@ module CentralLogger
       end
 
       def connect
+				uri = ENV['MONGOHQ_URL'] ? ENV['MONGOHQ_URL'] : @db_configuration['uri']
 
-				if ENV['MONGOHQ_URL']
-					uri = URI.parse(ENV['MONGOHQ_URL'])
-					@mongo_connection ||= Mongo::Connection.new(uri.host, uri.port, :auto_reconnect => true).db(uri.path.gsub(/^\//, ''))
+				if uri
+					uri = URI.parse(uri)
+					@mongo_connection ||= Mongo::Connection.from_uri(uri.to_s, :auto_reconnect => true).db(uri.path.gsub(/^\//, ''))
 					@authenticated = @mongo_connection.authenticate(uri.user, uri.password)
 				else
 					@mongo_connection ||= Mongo::Connection.new(@db_configuration['host'],
