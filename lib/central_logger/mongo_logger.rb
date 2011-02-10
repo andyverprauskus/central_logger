@@ -142,7 +142,23 @@ module CentralLogger
       end
 
       def insert_log_record(safe=false)
+        @mongo_record[:params] = filter_params(@mongo_record[:params])
         @mongo_collection.insert(@mongo_record, :safe => safe)
+      end
+
+      def filter_params(params)
+        params.inject({}) do |acc, (k, v)|
+          acc[k] = if v.is_a?(Hash)
+            filter_params(v)
+          else
+            begin
+              v.respond_to?(:unpack) && v.unpack("U*") ? v : v.inspect
+            rescue
+              v.inspect
+            end
+          end
+          acc
+        end
       end
 
       def level_to_sym(level)
