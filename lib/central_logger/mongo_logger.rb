@@ -28,7 +28,7 @@ module CentralLogger
     def add_metadata(options={})
       options.each_pair do |key, value|
         unless [:messages, :request_time, :ip, :runtime, :application_name].include?(key.to_sym)
-          @mongo_record[key] = value
+          @mongo_record[key] = filter_params(value)
         else
           raise ArgumentError, ":#{key} is a reserved key for the central logger. Please choose a different key"
         end
@@ -147,6 +147,7 @@ module CentralLogger
       end
 
       def filter_params(params)
+        return params unless params.is_a?(Hash)
         params.inject({}) do |acc, (k, v)|
           acc[k] = if v.is_a?(Hash)
             filter_params(v)
